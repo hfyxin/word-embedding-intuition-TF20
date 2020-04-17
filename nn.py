@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.base import BaseEstimator, TransformerMixin
 from scipy.sparse import csr_matrix
 from numpy import ndarray
+import numpy as np
 
 def autoencoder_1hid(n_input, n_hidden):
     '''A simple 3 layer AutoEncoder setup'''
@@ -38,17 +39,32 @@ def train(model, X, Y, n_epochs=1000, learning_rate=2.0):
     print('\nPlotting the loss value:')
     
 
-def plot_enc_2d(data:'2d array', label:'list', offset=0.1):
+def plot_enc_2d(data:'2d array', label:'list', offset=(0,0), size=[]):
     '''Scatter plot'''
-    assert data.shape[1] == 2   # in the case of 2d encoding
+    # check input shape
+    if data.shape[1] == 2: pass
+    elif data.shape[0] == 2: data = data.transpose()
+    else: 
+      print('Data dimension error:', data.shape)
+      return -1
     
-    z1 = data[:,0]   # use z1,z2 to differentiate from X,Y
-    z2 = data[:,1]
-    plt.scatter(z1, z2)
-    
+    z1 = data[:,0]   # coordinate on x axis
+    z2 = data[:,1]   # coordinate on y axis
+    if size:
+      plt.scatter(z1, z2, s=size, edgecolors='black', alpha=0.5)
+    else:
+      plt.scatter(z1, z2)
+
     # plot annotation
     for i, txt in enumerate(label):
-        plt.annotate(txt[0], (z1[i]+offset, z2[i]))
+      if size:
+        scale = max(size) * 20
+
+        plt.annotate(txt, (z1[i]+size[i]/scale+offset[0], z2[i]+offset[1]), fontsize=14)
+      else:
+        plt.annotate(txt, (z1[i]+offset[0], z2[i]+offset[1]), fontsize=14)
+
+    plt.grid()
 
 
 class nHotEncoder(BaseEstimator, TransformerMixin):
